@@ -1,40 +1,42 @@
 # -*- coding: utf-8 -*-
 import xml.etree.ElementTree as et
-from util import util
+import util
 import re
 
-path_questions = "data/questions.xml"
+chave_path_questions = "data/datasets/Chave.xml"
+uiuc_path_train_questions = "data/datasets/UIUC/train_5500.label.txt"
+uiuc_path_test_questions = "data/datasets/UIUC/TREC_10.label.txt"
+uiuc_pt_path_train_questions = "data/datasets/UIUC_PT/train.txt"
+uiuc_pt_path_test_questions = "data/datasets/UIUC_PT/test_.txt"
 
-# path_questions = "data/questions_test.xml"
-# path_questions = "data/questions_test_mini.xml"
 
-
-# Open questions file and return it tree
-def questions_tree():
-    tree = et.parse(path_questions)
+# Open xml file and return it tree
+def questions_tree(path):
+    tree = et.parse(path)
     return tree.getroot()
 
 
-# Return a list with all questions in dataset
-def questions(treated=False):
+# Return a list with all Chave questions as dictionary
+def chave_questions():
     ret = []
-    count = 0
-    for question in questions_tree():
+    count = 1
+    for question in questions_tree(chave_path_questions):
         q = {}
         q['id'] = count
         q['id_org'] = question.attrib['id_org']
         q['year'] = question.attrib['ano']
         q['category'] = question.attrib['categoria']
         q['type'] = question.attrib['tipo']
-        q['class'] = pair_classification(q['category'], q['type'])
-        q['predict_class'] = ''
+        q['class'] = chave_pair_classification(q['category'], q['type'])
         q['ling'] = question.attrib['ling_orig']
         if u'restrição' in question.attrib:
             q['restriction'] = question.attrib[u'restrição']
         if 'restricao' in question.attrib:
             q['restriction'] = question.attrib['restricao']
-        if q['restriction'] == 'NO': q['restriction'] = 'NONE'
-        if q['restriction'] == 'X': q['restriction'] = ''
+        if q['restriction'] == 'NO':
+            q['restriction'] = 'NONE'
+        if q['restriction'] == 'X':
+            q['restriction'] = ''
 
         q['answers'] = []
         q['extracts'] = []
@@ -45,53 +47,19 @@ def questions(treated=False):
             if e.tag == 'resposta':
                 if e.text is None or util.treat_text(e.text) == '':
                     continue
-                ans = {'answer':e.text, 'n':e.attrib['n'], 'doc':e.attrib['docid']}
-                ans['doc'] = validate_docid(ans['doc'])
+                ans = {'answer': e.text, 'n': e.attrib['n'], 'doc': e.attrib['docid']}
+                ans['doc'] = chave_validate_docid(ans['doc'])
                 q['answers'].append(ans)
             if e.tag == 'extracto':
-                q['extracts'].append({'extract':e.text, 'n':e.attrib['n'], 'answer_n':e.attrib['resposta_n']})
+                q['extracts'].append({'extract': e.text, 'n': e.attrib['n'], 'answer_n': e.attrib['resposta_n']})
         count += 1
         ret.append(q)
-    if treated:
-        ret = treat_questions_text(ret)
-        ret = select_questions_by_text(ret)
     return ret
-
-
-# Question text is treated
-def treat_questions_text(questions):
-    for question in questions:
-        if question['question'] is None:
-            question['question'] = ''
-        question['question'] = util.treat_text(question['question'])
-    return questions
-
-
-# Return questions with some text
-def select_questions_by_text(questions):
-    ret = []
-    for question in questions:
-        if len(question['question']) > 0:
-            ret.append(question)
-    return ret
-
-
-# Split question in train and test
-# The questions that has an answer will be used for test while another questions will be used for train
-def split_questions(questions):
-    train_questions = []
-    test_questions = []
-    for question in questions:
-        if len(question['answers']) > 0:
-            test_questions.append(question)
-        else:
-            train_questions.append(question)
-    return train_questions, test_questions
 
 
 # Check if a docid is valid (FolhaSP or Público) so return a docid in the
 # documents docid else return None
-def validate_docid(docid):
+def chave_validate_docid(docid):
     if docid is None or len(docid.strip()) < 10:
         return None
     else:
@@ -107,7 +75,7 @@ def validate_docid(docid):
 
 
 # Return the right question class based in category and type attributes
-def pair_classification(c, t):
+def chave_pair_classification(c, t):
     if c == 'COUNT':
         return 'MEASURE'
     if c == 'D' or c == 'DEFINITION':
@@ -141,3 +109,51 @@ def pair_classification(c, t):
     if c == 'TIME':
         return 'TIME'
     return c
+
+
+def uiuc_questions():
+    train = []
+    lines = open(uiuc_path_train_questions).readlines()
+    for line_ in lines:
+        q = {}
+        line = line_.strip()
+        q['class'] = line[:line.index(':')]
+        q['sub_class'] = line[line.index(':')+1:line.index(' ')]
+        q['question'] = line[line.index(' '):].strip()
+        train.append(q)
+
+    test = []
+    lines = open(uiuc_path_test_questions).readlines()
+    for line_ in lines:
+        q = {}
+        line = line_.strip()
+        q['class'] = line[:line.index(':')]
+        q['sub_class'] = line[line.index(':')+1:line.index(' ')]
+        q['question'] = line[line.index(' '):].strip()
+        test.append(q)
+
+    return train, test
+
+
+def uiuc_pt_questions():
+    train = []
+    lines = open(uiuc_pt_path_train_questions, encoding='utf-8').readlines()
+    for line_ in lines:
+        q = {}
+        line = line_.strip()
+        q['class'] = line[:line.index(':')]
+        q['sub_class'] = line[line.index(':')+1:line.index(' ')]
+        q['question'] = line[line.index(' '):].strip()
+        train.append(q)
+
+    test = []
+    lines = open(uiuc_pt_path_test_questions).readlines()
+    for line_ in lines:
+        q = {}
+        line = line_.strip()
+        q['class'] = line[:line.index(':')]
+        q['sub_class'] = line[line.index(':')+1:line.index(' ')]
+        q['question'] = line[line.index(' '):].strip()
+        test.append(q)
+
+    return train, test
