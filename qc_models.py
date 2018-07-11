@@ -1,16 +1,19 @@
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
+from collections import defaultdict
 import numpy as np
 
 
 def count_vectorizer(MIN_GRAM=1, MAX_GRAM=1, LOWER=True):
-    return CountVectorizer(analyzer=lambda x: x, strip_accents=None, ngram_range=(MIN_GRAM, MAX_GRAM),
-                           token_pattern=u'(?u)\\\\b\\\\w+\\\\b', lowercase=LOWER)
+    #return CountVectorizer(analyzer=lambda x: x, strip_accents=None, ngram_range=(MIN_GRAM, MAX_GRAM),
+    #                       token_pattern=u'(?u)\\\\b\\\\w+\\\\b', lowercase=LOWER)
+    return CountVectorizer(analyzer='word', strip_accents=None, ngram_range=(MIN_GRAM, MAX_GRAM), lowercase=LOWER)
 
 
 def tfidf_vectorizer(MIN_GRAM=1, MAX_GRAM=1, LOWER=True):
-    return TfidfVectorizer(analyzer=lambda x: x, strip_accents=None, ngram_range=(MIN_GRAM, MAX_GRAM),
-                           token_pattern=u'(?u)\\\\b\\\\w+\\\\b', lowercase=LOWER)
+    #return TfidfVectorizer(analyzer=lambda x: x, strip_accents=None, ngram_range=(MIN_GRAM, MAX_GRAM),
+    #                       token_pattern=u'(?u)\\\\b\\\\w+\\\\b', lowercase=LOWER)
+    return TfidfVectorizer(analyzer='word', strip_accents=None, ngram_range=(MIN_GRAM, MAX_GRAM), lowercase=LOWER)
 
 
 class MeanEmbeddingVectorizer(object):
