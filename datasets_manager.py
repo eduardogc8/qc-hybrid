@@ -16,6 +16,25 @@ def questions_tree(path):
     return tree.getroot()
 
 
+def separete_questions(questions, label_key='class'):
+    X = []
+    y = []
+    for question in questions:
+        text = question['question']
+        X.append(text)
+        y.append(question[label_key])
+    return X, y
+
+
+def words2indexes(x):
+    from sklearn.feature_extraction.text import CountVectorizer
+    cv = CountVectorizer(analyzer='word', strip_accents=None)
+    cv = cv.fit(x)
+    bt = cv.build_tokenizer()
+    return [[cv.vocabulary_[word] for word in bt(sentence) if word in cv.vocabulary_.keys()] for sentence in x]
+
+
+
 # Return a list with all Chave questions as dictionary
 def chave_questions():
     ret = []
