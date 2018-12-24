@@ -4,16 +4,28 @@ from collections import defaultdict
 import numpy as np
 
 
-def count_vectorizer(MIN_GRAM=1, MAX_GRAM=1, LOWER=True):
+class my_vectorizer:
+
+    def __init__(self, cv):
+        self.cv = cv
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        return self.cv.transform(X)
+
+
+def count_vectorizer(MIN_GRAM=1, MAX_GRAM=1, LOWER=True, max_features=None):
     #return CountVectorizer(analyzer=lambda x: x, strip_accents=None, ngram_range=(MIN_GRAM, MAX_GRAM),
     #                       token_pattern=u'(?u)\\\\b\\\\w+\\\\b', lowercase=LOWER)
-    return CountVectorizer(analyzer='word', strip_accents=None, ngram_range=(MIN_GRAM, MAX_GRAM), lowercase=LOWER)
+    return CountVectorizer(analyzer='word', strip_accents=None, ngram_range=(MIN_GRAM, MAX_GRAM), lowercase=LOWER, max_features=max_features)
 
 
-def tfidf_vectorizer(MIN_GRAM=1, MAX_GRAM=1, LOWER=True):
+def tfidf_vectorizer(MIN_GRAM=1, MAX_GRAM=1, LOWER=True, max_features=None):
     #return TfidfVectorizer(analyzer=lambda x: x, strip_accents=None, ngram_range=(MIN_GRAM, MAX_GRAM),
     #                       token_pattern=u'(?u)\\\\b\\\\w+\\\\b', lowercase=LOWER)
-    return TfidfVectorizer(analyzer='word', strip_accents=None, ngram_range=(MIN_GRAM, MAX_GRAM), lowercase=LOWER)
+    return TfidfVectorizer(analyzer='word', strip_accents=None, ngram_range=(MIN_GRAM, MAX_GRAM), lowercase=LOWER, max_features=max_features)
 
 
 class MeanEmbeddingVectorizer(object):
@@ -34,10 +46,10 @@ class MeanEmbeddingVectorizer(object):
 
 
 class HybridVectorizer(object):
-    def __init__(self, word2vec):
+    def __init__(self, word2vec, cv):
         self.word2vec = word2vec
         self.dim = len(word2vec)
-        self.bow = count_vectorizer()
+        self.bow = cv
 
     def fit(self, X, y):
         self.bow.fit(X)

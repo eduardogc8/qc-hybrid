@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import xml.etree.ElementTree as et
-import util
+import myutil as util
 import re
 
 chave_path_questions = "data/datasets/Chave.xml"
