@@ -2,7 +2,7 @@
 
 Question Classification approach for Question Answering system for Portuguese using Chave collection https://www.linguateca.pt/CHAVE/.
 
-In the benchmark.ipynb is available the results.
+In the main.ipynb is available the results.
 
 ## Article
 https://link.springer.com/chapter/10.1007/978-3-319-99722-3_14
